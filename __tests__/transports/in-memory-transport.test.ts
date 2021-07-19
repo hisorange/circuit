@@ -2,8 +2,8 @@ import {
   AlreadyConnectedException,
   NotConnectedException,
 } from '../../src/exceptions';
-import { Message } from '../../src/message';
-import { Subscription } from '../../src/subscription';
+import { Message } from '../../src/messaging/message';
+import { Subscription } from '../../src/messaging/subscription';
 import { InMemoryTransport } from '../../src/transports';
 
 describe('In Memory Transport', () => {

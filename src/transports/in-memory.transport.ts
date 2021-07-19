@@ -3,7 +3,7 @@ import {
   NotConnectedException,
 } from '../exceptions';
 import { ISubscription, ITransport } from '../interfaces';
-import { Message } from '../message';
+import { Message } from '../messaging/message';
 
 /**
  * Simple in memory transport, used for testing and can be useful when developing applications

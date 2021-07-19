@@ -1,5 +1,5 @@
 import { Circuit } from '../src';
-import { Subscription } from '../src/subscription';
+import { Subscription } from '../src/messaging/subscription';
 
 describe('Publish Subscribe', () => {
   test('should transport the message', async () => {

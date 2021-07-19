@@ -4,9 +4,9 @@ import {
   ISubscription,
   ITransport,
 } from './interfaces';
-import { Message } from './message';
+import { Message } from './messaging/message';
+import { Subscription } from './messaging/subscription';
 import { Network } from './network';
-import { Subscription } from './subscription';
 import { InMemoryTransport } from './transports';
 import UUID = require('uuid');
 

@@ -1,4 +1,4 @@
-import { Message } from '../message';
+import { Message } from '../messaging/message';
 
 export type IRequestHandler<I = any, O = any> = (
   msg: Message<I>,

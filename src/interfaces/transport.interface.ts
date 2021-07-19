@@ -1,4 +1,4 @@
-import { Message } from '../message';
+import { Message } from '../messaging/message';
 import { ISubscription } from './subscription.interface';
 
 export interface ITransport {

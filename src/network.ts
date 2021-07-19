@@ -1,6 +1,6 @@
 import { ITransport } from './interfaces';
-import { Message } from './message';
-import { Subscription } from './subscription';
+import { Message } from './messaging/message';
+import { Subscription } from './messaging/subscription';
 
 interface Update {
   node: string;

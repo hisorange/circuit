@@ -1,5 +1,5 @@
-import { IRequestHandler, ISubscribeHandler } from './interfaces';
-import { ISubscription } from './interfaces/subscription.interface';
+import { IRequestHandler, ISubscribeHandler } from '../interfaces';
+import { ISubscription } from '../interfaces/subscription.interface';
 import UUID = require('uuid');
 
 export class Subscription implements ISubscription {
