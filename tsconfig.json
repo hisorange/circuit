@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.dev.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["./src", "./__tests__", "jest.config.js"]
+}

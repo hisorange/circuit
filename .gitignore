@@ -1,0 +1,17 @@
+# Node
+/node_modules/
+
+# IDE
+/.idea
+/.awcache
+
+# Build artifacts
+/build
+/tsconfig.tsbuildinfo
+/package-lock.json
+/yarn.lock
+/yarn-error.log
+
+
+# Code coverage report
+/coverage

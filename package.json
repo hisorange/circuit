@@ -1,0 +1,46 @@
+{
+  "name": "@hisorange/circuit",
+  "version": "0.0.1",
+  "description": "Messaging bus with multiple transport layer support.",
+  "keywords": [
+    "messaging",
+    "message-bus",
+    "rpc",
+    "pubsub",
+    "transport",
+    "broker"
+  ],
+  "main": "./build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hisorange/circuit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hisorange/circuit/issues"
+  },
+  "author": "Zsolt Varga <hello@hisorange.me>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "jest --collectCoverage=0",
+    "test:cover": "jest",
+    "build": "rimraf build && tsc -p tsconfig.dev.json",
+    "build:watch": "rimraf build && tsc -p tsconfig.dev.json --watch",
+    "build:prod": "rimraf build && tsc -p tsconfig.prod.json"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.0.2",
+    "@types/uuid": "^8.3.1",
+    "jest": "^27.0.3",
+    "ts-jest": "^27.0.2",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "ts-deepmerge": "^1.0.8",
+    "tslib": "^2.3.0",
+    "uuid": "^8.3.2"
+  }
+}

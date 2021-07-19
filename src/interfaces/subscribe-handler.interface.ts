@@ -1,0 +1,1 @@
+export type ISubscribeHandler = (params: any) => Promise<void> | void;
