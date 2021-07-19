@@ -27,5 +27,7 @@ describe('Publish Subscribe', () => {
 
     expect(s).toBeInstanceOf(Subscription);
     expect(c['transport'].subscribe).toHaveBeenCalledTimes(1);
+
+    await c.disconnect();
   });
 });
