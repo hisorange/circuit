@@ -55,7 +55,7 @@ describe('In Memory Transport', () => {
       const t = new InMemoryTransport();
       await t.connect();
 
-      t.publish('test1', new Message(1));
+      t.publish('test1', new Message());
       t.subscribe('test2', new Subscription(() => {}));
 
       await t.disconnect();
@@ -66,11 +66,28 @@ describe('In Memory Transport', () => {
   });
 
   describe('Message Processing', () => {
+    test('should throw when publish is not connected', async () => {
+      const t = new InMemoryTransport();
+
+      expect(() => t.publish('a', new Message())).rejects.toThrow(
+        NotConnectedException,
+      );
+    });
+
+    test('should throw when subscribe is not connected', async () => {
+      const t = new InMemoryTransport();
+
+      expect(() =>
+        t.subscribe('a', new Subscription(() => {})),
+      ).rejects.toThrow(NotConnectedException);
+    });
+
     test('should dispatch message to multiple subscribers', async () => {
       const t = new InMemoryTransport();
       await t.connect();
 
-      const msg_1 = new Message('a');
+      const msg_1 = new Message();
+      msg_1.content = 'a';
 
       await t.subscribe(
         'c1',
@@ -100,7 +117,8 @@ describe('In Memory Transport', () => {
       const t = new InMemoryTransport();
       await t.connect();
 
-      const msg_1 = new Message('a');
+      const msg_1 = new Message();
+      msg_1.content = 'a';
 
       await t.publish('c1', msg_1);
 
@@ -121,7 +139,8 @@ describe('In Memory Transport', () => {
       const t = new InMemoryTransport();
       await t.connect();
 
-      const msg_1 = new Message('a');
+      const msg_1 = new Message();
+      msg_1.content = 'a';
 
       await t.publish('c2', msg_1);
       await t.subscribe('c1', new Subscription(msg => {}));

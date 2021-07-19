@@ -59,6 +59,10 @@ export class InMemoryTransport implements ITransport {
   }
 
   async publish(channel: string, message: Message): Promise<void> {
+    if (!this.isConnected()) {
+      throw new NotConnectedException();
+    }
+
     // Upsert the channel group
     if (!this.queues.has(channel)) {
       this.queues.set(channel, []);
@@ -71,6 +75,10 @@ export class InMemoryTransport implements ITransport {
   }
 
   async subscribe(channel: string, subscriber: ISubscription): Promise<void> {
+    if (!this.isConnected()) {
+      throw new NotConnectedException();
+    }
+
     // Upsert the channel group
     if (!this.subscribers.has(channel)) {
       this.subscribers.set(channel, []);
