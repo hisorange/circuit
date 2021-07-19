@@ -1,1 +1,3 @@
-export type ISubscribeHandler = (params: any) => Promise<void> | void;
+import { Message } from '../message';
+
+export type ISubscribeHandler = (msg: Message) => Promise<void> | void;
