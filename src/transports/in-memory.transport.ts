@@ -1,72 +1,119 @@
+import {
+  AlreadyConnectedException,
+  NotConnectedException,
+} from '../exceptions';
 import { ISubscription, ITransport } from '../interfaces';
+import { Message } from '../message';
 
+/**
+ * Simple in memory transport, used for testing and can be useful when developing applications
+ * which will be connected to a real message queue in the future but until then a simple instance
+ * can manage the workload.
+ *
+ * The transport tries to act more like a real queue, keeps the messages in an array queue and not just
+ * pushing to currently active subscribers, this allows us to enqueue messages and register subscribers
+ * later, just like in RabbitMQ and others.
+ */
 export class InMemoryTransport implements ITransport {
-  protected queues = new Map<string, any[]>();
-  protected connection: NodeJS.Timer;
-  protected subscribers = new Map<string, ISubscription[]>();
+  /**
+   * @description Local interval used to process queues more like a remote server would.
+   */
+  protected connection: boolean = false;
 
-  constructor() {}
+  /**
+   * @description Store messages grouped by channels.
+   */
+  protected queues: Map<string, Message[]>;
+
+  /**
+   * @description Registered subscriptions grouped by channels.
+   */
+  protected subscribers: Map<string, ISubscription[]>;
+
+  isConnected() {
+    return this.connection;
+  }
 
   async connect() {
-    this.connection = setInterval(this.process.bind(this), 1);
+    if (this.isConnected()) {
+      throw new AlreadyConnectedException();
+    }
 
-    console.log('Connected');
+    // Create collectors
+    this.clearMessageQueues();
+    this.clearSubscribers();
+
+    this.connection = true;
   }
 
   async disconnect() {
-    if (this.connection) {
-      clearInterval(this.connection);
+    if (!this.isConnected()) {
+      throw new NotConnectedException();
     }
 
-    // Clear the message queue.
-    this.queues = new Map<string, any[]>();
+    this.connection = false;
 
-    console.log('Disconnected');
+    // Clear leftovers
+    this.clearMessageQueues();
+    this.clearSubscribers();
   }
 
-  async publish(channel: string, message: any): Promise<void> {
+  async publish(channel: string, message: Message): Promise<void> {
+    // Upsert the channel group
     if (!this.queues.has(channel)) {
       this.queues.set(channel, []);
-
-      console.log('Creating queue', {
-        channel,
-      });
     }
 
     this.queues.get(channel).push(message);
 
-    console.log('Publishing message on channel', {
-      channel,
-    });
+    // Change detected, process the existing message queues.
+    this.processQueues();
   }
 
   async subscribe(channel: string, subscriber: ISubscription): Promise<void> {
+    // Upsert the channel group
     if (!this.subscribers.has(channel)) {
       this.subscribers.set(channel, []);
-
-      console.log('Creating subscription', {
-        channel,
-      });
     }
 
     this.subscribers.get(channel).push(subscriber);
 
-    console.log('Subscribing to channel', {
-      channel,
-      subscriber: subscriber.id,
-    });
+    // Change detected, process the existing message queues.
+    this.processQueues();
   }
 
-  protected process() {
-    for (const [channel, messages] of this.queues.entries()) {
+  /**
+   * @description Clear the message queue reference.
+   */
+  protected clearMessageQueues() {
+    this.queues = new Map<string, Message[]>();
+  }
+
+  /**
+   * @description Clear the message queue reference.
+   */
+  protected clearSubscribers() {
+    this.subscribers = new Map<string, ISubscription[]>();
+  }
+
+  /**
+   * @description Process the queued messages and dispatch to the subscribers.
+   */
+  protected processQueues() {
+    // Fetch the active message queues
+    for (const [channel, queue] of this.queues.entries()) {
+      // Check for active subscriptions
       if (this.subscribers.has(channel)) {
         const subscribers = this.subscribers.get(channel);
 
         for (const subscriber of subscribers) {
-          for (const message of messages) {
+          for (const message of queue) {
             subscriber.handler(message);
           }
         }
+
+        // Channel is cleared.
+        this.queues.delete(channel);
       }
     }
   }
