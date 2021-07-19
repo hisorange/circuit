@@ -2,23 +2,20 @@ import { Circuit } from '../src';
 import { Subscription } from '../src/subscription';
 
 describe('Publish Subscribe', () => {
-  test('should transport the message', done => {
+  test('should transport the message', async () => {
     const c = new Circuit('n1');
-    c.connect().then(() => {
-      c.subscribe('test1', params => {
-        expect(params.params).toBe('a');
 
-        c.disconnect().then(() => {
-          done();
-        });
-      });
-
-      c.publish('test1', 'a');
+    await c.connect();
+    await c.subscribe('test1', msg => {
+      expect(msg.content).toBe('a');
     });
+
+    await c.publish('test1', 'a');
   }, 50);
 
   test('should create a subscription', async () => {
     const c = new Circuit('n1');
+    await c.connect();
 
     jest.spyOn(c['transport'], 'subscribe');
 
