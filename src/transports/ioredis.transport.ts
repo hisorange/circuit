@@ -86,7 +86,7 @@ export class IoRedisTransport implements ITransport {
     }
 
     this.subscribers.get(channel).push(subscriber);
-    this.subCon.subscribe(channel);
+    await this.subCon.subscribe(channel);
   }
 
   protected async subscribeRouter(channel: string, messageString: string) {

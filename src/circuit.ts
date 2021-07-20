@@ -51,7 +51,7 @@ export class Circuit {
     request.sender = this.id;
     request.channel = channel;
     request.recipient = this.network.find(channel);
-    request.replyTo = `reply.${this.id}`;
+    request.replyTo = `reply.${request.id}`;
     request.content = content;
 
     return this.createResponseHandler<I, O>(request);
