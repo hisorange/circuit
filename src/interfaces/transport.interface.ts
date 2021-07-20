@@ -1,4 +1,5 @@
 import { Message } from '../messaging/message';
+import { ISerializer } from './serializer.interface';
 import { ISubscription } from './subscription.interface';
 
 export interface ITransport {
@@ -18,6 +19,11 @@ export interface ITransport {
    * @description Check for the connection status.
    */
   isConnected(): boolean;
+
+  /**
+   * @description Message serializer.
+   */
+  readonly serializer: ISerializer;
 
   publish(channel: string, message: Message): Promise<void>;
   subscribe(channel: string, subscriber: ISubscription): Promise<void>;

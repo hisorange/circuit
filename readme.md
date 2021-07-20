@@ -57,6 +57,10 @@ This package is part of a theme where I am trying to reuse the hardware solution
 
 ---
 
+##### 0.2.0
+
+- Decouple the serializer from the IORedis transport
+
 ##### 0.1.0
 
 - RPC is now handled on a single channel with a reply router!

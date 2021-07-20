@@ -2,8 +2,9 @@ import {
   AlreadyConnectedException,
   NotConnectedException,
 } from '../exceptions';
-import { ISubscription, ITransport } from '../interfaces';
+import { ISerializer, ISubscription, ITransport } from '../interfaces';
 import { Message } from '../messaging/message';
+import { JsonSerializer } from '../serializers';
 import Redis = require('ioredis');
 
 /**
@@ -20,6 +21,8 @@ export class IoRedisTransport implements ITransport {
    * @description Registered subscriptions grouped by channels.
    */
   protected subscribers = new Map<string, ISubscription[]>();
+
+  readonly serializer: ISerializer = new JsonSerializer();
 
   constructor(protected config: Redis.RedisOptions = undefined) {}
 
@@ -72,7 +75,7 @@ export class IoRedisTransport implements ITransport {
       throw new NotConnectedException();
     }
 
-    await this.pubCon.publish(channel, JSON.stringify(message));
+    await this.pubCon.publish(channel, this.serializer.serialize(message));
   }
 
   async subscribe(channel: string, subscriber: ISubscription): Promise<void> {
@@ -90,14 +93,7 @@ export class IoRedisTransport implements ITransport {
   }
 
   protected async subscribeRouter(channel: string, messageString: string) {
-    const messageRaw: Message = JSON.parse(messageString);
-    const message = new Message();
-
-    for (const key in messageRaw) {
-      if (Object.prototype.hasOwnProperty.call(messageRaw, key)) {
-        message[key] = messageRaw[key];
-      }
-    }
+    const message = this.serializer.deserialize(messageString);
 
     // Check for active subscriptions
     if (this.subscribers.has(channel)) {

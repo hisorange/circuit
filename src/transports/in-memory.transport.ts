@@ -2,7 +2,7 @@ import {
   AlreadyConnectedException,
   NotConnectedException,
 } from '../exceptions';
-import { ISubscription, ITransport } from '../interfaces';
+import { ISerializer, ISubscription, ITransport } from '../interfaces';
 import { Message } from '../messaging/message';
 
 /**
@@ -29,6 +29,8 @@ export class InMemoryTransport implements ITransport {
    * @description Registered subscriptions grouped by channels.
    */
   protected subscribers: Map<string, ISubscription[]>;
+
+  readonly serializer: ISerializer;
 
   isConnected() {
     return this.connection;

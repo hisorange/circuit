@@ -1,6 +1,6 @@
 {
   "name": "@hisorange/circuit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Messaging bus with multiple transport layer support.",
   "keywords": [
     "messaging",
