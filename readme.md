@@ -57,6 +57,10 @@ This package is part of a theme where I am trying to reuse the hardware solution
 
 ---
 
+##### 0.0.4
+
+- Use round robin when chosing the responder
+
 ##### 0.0.2
 
 - Experimental IO Redis transport

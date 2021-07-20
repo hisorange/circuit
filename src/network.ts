@@ -10,6 +10,7 @@ type ChannelID = string;
 export class Network {
   protected map = new Map<ChannelID, Set<CircuitID>>();
   protected circuit: Circuit;
+  protected roundRobin: { [K in string]: number } = {};
 
   bind(circuit: Circuit) {
     this.circuit = circuit;
@@ -137,7 +138,15 @@ export class Network {
 
       if (circuits.length) {
         // Pick a random circuit.
-        return circuits[0];
+        if (circuits.length === 1) {
+          return circuits[0];
+        } else {
+          if (!this.roundRobin[channel]) {
+            this.roundRobin[channel] = 0;
+          }
+
+          return circuits[this.roundRobin[channel]++ % circuits.length];
+        }
       }
     }
 

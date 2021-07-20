@@ -201,4 +201,18 @@ describe('Network', () => {
       //expect(m2['network'].find('b')).toBe('m2');
     });
   });
+
+  test('should retrive in round robin', async () => {
+    const m1 = new Circuit('m1');
+    const m2 = new Circuit('m2');
+    await m1.connect();
+    await m2.connect();
+    await m1.subscribe('a', () => {});
+    await m2.subscribe('a', () => {});
+
+    expect(m1['network'].find('a')).toBe('m1');
+    expect(m2['network'].find('a')).toBe('m2');
+    expect(m1['network'].find('a')).toBe('m1');
+    expect(m2['network'].find('a')).toBe('m2');
+  });
 });
