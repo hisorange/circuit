@@ -1,4 +1,4 @@
-import { Subscription } from '../src/messaging/subscription';
+import { Subscription } from '../../src/messaging/subscription';
 
 describe('Subscription', () => {
   test('should generate a unique ID', () => {
