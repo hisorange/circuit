@@ -1,8 +1,12 @@
-module.exports = {
+
+/** @type {import("ts-jest/dist/types").InitialOptionsTsJest} */
+const jestConfig = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   rootDir: '.',
   testMatch: ['**/__tests__/**/*.test.ts'],
+
+  cache: false,
 
   silent: true,
   verbose: true,
@@ -28,3 +32,6 @@ module.exports = {
     },
   },
 };
+
+
+module.exports = jestConfig;

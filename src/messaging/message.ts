@@ -14,7 +14,7 @@ export class Message<P = string | number | Object | boolean> {
   /**
    * @description Recipient node, not set when publishing to multiple node.
    */
-  public recipient: string | null;
+  public recipient?: string;
 
   /**
    * @description Target channel.
@@ -24,12 +24,22 @@ export class Message<P = string | number | Object | boolean> {
   /**
    * @description Reply to ~ Temporary solution until the reply router is implemented.
    */
-  public replyTo: string | null;
+  public replyTo?: string;
+
+  /**
+   * @description Message ID which gets the reply.
+   */
+  public replyFor?: string;
 
   /**
    * @description UTC timestamp of creation.
    */
   readonly createdAt: number;
+
+  /**
+   * @description Message expiration tracker.
+   */
+  public timeToLive?: number;
 
   /**
    * @description Arbitrary message content.
