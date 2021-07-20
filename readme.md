@@ -1,5 +1,4 @@
-# Circuit
-
+![Circuit Logo](https://user-images.githubusercontent.com/3441017/126361006-5272a10e-d123-404d-90ea-60a832258eec.png)
 ---
 
 ### Quick Start
