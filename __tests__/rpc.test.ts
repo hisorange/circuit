@@ -10,7 +10,7 @@ type SumResult = number;
 
 describe('RPC', () => {
   describe('Single Node', () => {
-    test.skip('should respond to request', async () => {
+    test('should respond to request', async () => {
       const c = new Circuit('r0');
       await c.connect();
 
@@ -30,7 +30,7 @@ describe('RPC', () => {
   });
 
   describe('Multi Node', () => {
-    test.skip('should respond to request', async () => {
+    test('should respond to request', async () => {
       const t = new InMemoryTransport();
 
       const c1 = new Circuit('r1', t);

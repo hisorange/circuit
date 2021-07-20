@@ -36,11 +36,13 @@ export class Circuit {
   }
 
   async disconnect() {
-    // Annonunce the remove, so the network will forget about us.
-    await this.network.deregister(...Array.from(this.subscriptions.keys()));
-
     // Disconnect the transport.
-    await this.transport.disconnect();
+    if (this.transport.isConnected()) {
+      // Annonunce the remove, so the network will forget about us.
+      await this.network.deregister(...Array.from(this.subscriptions.keys()));
+
+      await this.transport.disconnect();
+    }
   }
 
   // RPC
@@ -78,10 +80,12 @@ export class Circuit {
     handler: IRequestHandler<I, O>,
   ): Promise<ISubscription> {
     // A single channel associated to this node's execution for this job.
-    const nodeChannel = this.id + '.' + channel;
+    const directChannel = this.id + '.' + channel;
+
+    await this.network.register(channel);
 
     return await this.subscribe(
-      nodeChannel,
+      directChannel,
       this.createRequestHandler(handler),
     );
   }
