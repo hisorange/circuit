@@ -18,7 +18,7 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: './coverage',
   coverageReporters: ['clover', 'lcov', 'text'],
-  collectCoverageFrom: ['./src/**/*.ts', '!**/node_modules/**'],
+  collectCoverageFrom: ['./src/**/*.ts', '!./src/transports/(ioredis).transport.ts', '!**/node_modules/**'],
   coverageThreshold: {
     global: {
       branches: 10,
