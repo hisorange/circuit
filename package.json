@@ -1,6 +1,6 @@
 {
   "name": "@hisorange/circuit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Messaging bus with multiple transport layer support.",
   "keywords": [
     "messaging",
@@ -31,6 +31,7 @@
     "build:prod": "rimraf build && tsc -p tsconfig.prod.json"
   },
   "devDependencies": {
+    "@types/ioredis": "~4.26.6",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.0.2",
     "@types/uuid": "^8.3.1",
@@ -42,5 +43,8 @@
     "ts-deepmerge": "^1.0.8",
     "tslib": "^2.3.0",
     "uuid": "^8.3.2"
+  },
+  "optionalDependencies": {
+    "ioredis": "~4.27.6"
   }
 }

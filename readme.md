@@ -14,6 +14,11 @@ yarn add @hisorange/circuit
 
 Easy to implement message bus with various transport layer support.
 
+### Transport Support
+
+- InMemory
+- IORedis
+
 ### RPC
 
 ```ts
@@ -51,6 +56,10 @@ This package is part of a theme where I am trying to reuse the hardware solution
 ### Changelog
 
 ---
+
+##### 0.0.2
+
+- Experimental IO Redis transport
 
 ##### 0.0.1
 

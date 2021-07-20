@@ -1,0 +1,9 @@
+version: '3.6'
+
+services:
+  test-redis:
+    container_name: test-redis
+    hostname: test-redis
+    image: redis
+    ports:
+      - 6379:6379
