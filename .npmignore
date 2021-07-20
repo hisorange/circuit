@@ -5,6 +5,7 @@ __tests__/
 build/*.spec.js
 build/**/*.spec.js
 jest.config.js
+coverage/
 src/
 tsconfig.dev.json
 tsconfig.json
