@@ -6,7 +6,7 @@
 /.awcache
 
 # Build artifacts
-/build
+/build/
 /tsconfig.tsbuildinfo
 /package-lock.json
 /yarn.lock

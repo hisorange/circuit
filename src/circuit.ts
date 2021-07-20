@@ -10,10 +10,13 @@ import { Network } from './network';
 import { InMemoryTransport } from './transports';
 import UUID = require('uuid');
 
+type MessageContent = string | number | Object | boolean;
+
 export class Circuit {
   protected network: Network;
+  protected subscriptions = new Map<string, ISubscription[]>();
 
-  constructor(protected id?: string, protected transport?: ITransport) {
+  constructor(readonly id?: string, protected transport?: ITransport) {
     if (!this.id) {
       this.id = UUID.v4();
     }
@@ -21,15 +24,22 @@ export class Circuit {
     if (!this.transport) {
       this.transport = new InMemoryTransport();
     }
-
-    //this.network = new Network(this.transport, this.id);
   }
 
   async connect() {
-    await this.transport.connect();
+    if (!this.transport.isConnected()) {
+      await this.transport.connect();
+    }
+
+    this.network = new Network();
+    this.network.bind(this);
   }
 
   async disconnect() {
+    // Annonunce the remove, so the network will forget about us.
+    await this.network.deregister(...Array.from(this.subscriptions.keys()));
+
+    // Disconnect the transport.
     await this.transport.disconnect();
   }
 
@@ -38,7 +48,7 @@ export class Circuit {
     const request = new Message<I>();
     request.sender = this.id;
     request.channel = channel;
-    request.recipient = this.network.findListener(channel);
+    request.recipient = this.network.find(channel);
     request.replyTo = `reply.${this.id}`;
     request.content = content;
 
@@ -97,11 +107,18 @@ export class Circuit {
   /**
    * @description Publish a message every listener on the channel.
    */
-  async publish(channel: string, content: string | number | Object | boolean) {
-    const msg = new Message();
-    msg.sender = this.id;
+  async publish(channel: string, content: MessageContent | Message) {
+    let msg: Message;
+
+    if (content instanceof Message) {
+      msg = content;
+    } else {
+      msg = new Message();
+      msg.content = content;
+    }
+
     msg.channel = channel;
-    msg.content = content;
+    msg.sender = this.id;
 
     return this.transport.publish(channel, msg);
   }
@@ -109,12 +126,19 @@ export class Circuit {
   /**
    * @description Subscribe to a channel which actuates the given handler on receive.
    */
-  async subscribe(
+  async subscribe<I = any>(
     channel: string,
-    handler: ISubscribeHandler,
+    handler: ISubscribeHandler<I>,
   ): Promise<ISubscription> {
     const subscription = new Subscription(handler);
     this.transport.subscribe(channel, subscription);
+
+    if (!this.subscriptions.has(channel)) {
+      this.subscriptions.set(channel, []);
+    }
+
+    this.subscriptions.get(channel).push(subscription);
+    await this.network.register(channel);
 
     return subscription;
   }

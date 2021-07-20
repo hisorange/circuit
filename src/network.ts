@@ -1,89 +1,146 @@
-import { ITransport } from './interfaces';
+import { Circuit } from './circuit';
+import { NotFoundException } from './exceptions';
+import { NetworkChangeMessage } from './interfaces';
 import { Message } from './messaging/message';
-import { Subscription } from './messaging/subscription';
 
-interface Update {
-  node: string;
-  channel: string;
-}
+// For better visibility.
+type CircuitID = string;
+type ChannelID = string;
 
 export class Network {
-  protected listeners = new Map<string, Set<string>>();
+  protected map = new Map<ChannelID, Set<CircuitID>>();
+  protected circuit: Circuit;
 
-  constructor(protected transport: ITransport, readonly localId: string) {
-    // Register for changes.
-    this.transport.subscribe(
-      '$network',
-      new Subscription(this.registerRemote.bind(this)),
+  bind(circuit: Circuit) {
+    this.circuit = circuit;
+    this.circuit.subscribe('$network', this.handleNetworkChange.bind(this));
+    this.circuit.subscribe(
+      '$network.' + this.circuit.id,
+      this.handleNetworkChange.bind(this),
     );
+
+    this.sendJoinMessage();
   }
 
-  protected registerRemote(msg: Message<Update>) {
-    // Quit on self.
-    if (msg.content.node == this.localId) {
+  // Send a join and ask the networks to whisper their messages.
+  protected sendJoinMessage() {
+    const msg = new Message<NetworkChangeMessage>();
+    msg.content = {
+      action: 'join',
+      channels: [],
+    };
+
+    this.circuit.publish('$network', msg);
+  }
+
+  protected handleNetworkChange(req: Message<NetworkChangeMessage>): void {
+    // Ignore the own network changes.
+    if (req.sender == this.circuit.id) {
       return;
     }
 
-    console.log('Remote node registering', {
-      update: msg.content,
-      localId: this.localId,
-    });
+    switch (req.content.action) {
+      // Add the circuit to the given channel(s).
+      case 'add':
+        for (const channel of req.content.channels) {
+          if (!this.map.has(channel)) {
+            this.map.set(channel, new Set());
+          }
 
-    if (!this.listeners.has(msg.content.channel)) {
-      this.listeners.set(msg.content.channel, new Set());
-    }
-
-    this.listeners.get(msg.content.channel).add(msg.content.node);
-  }
-
-  async registerLocal(channel: string) {
-    if (!this.listeners.has(channel)) {
-      this.listeners.set(channel, new Set());
-    }
-
-    this.listeners.get(channel).add(this.localId);
-
-    if (channel !== '$network') {
-      console.log('Publishing network update', {
-        node: this.localId,
-        channel,
-      });
-
-      const msg = new Message<Update>();
-      msg.content = {
-        node: this.localId,
-        channel,
-      };
-
-      await this.transport.publish('$network', msg);
-    }
-  }
-
-  findListener(channel: string): string {
-    if (this.listeners.has(channel)) {
-      const listeners = Array.from(this.listeners.get(channel).values());
-      let i = 0;
-
-      console.log('Listeners', { listeners });
-
-      while (++i) {
-        const r = Math.random();
-        const w = 1 / listeners.length;
-
-        if (r <= w) {
-          const k = i % listeners.length;
-
-          const listener = listeners[k];
-
-          console.log('Randomly selected node', {
-            node: listener,
-          });
-
-          return `${channel}.${listener}`;
+          this.map.get(channel).add(req.sender);
         }
+        break;
+
+      // Remove the circuit from the given channel(s)
+      case 'remove':
+        for (const channel of req.content.channels) {
+          if (this.map.has(channel)) {
+            this.map.get(channel).delete(req.sender);
+          }
+        }
+
+        break;
+
+      // Send the full map to the new circuit
+      case 'join':
+        this.sendOwnChannels(req.sender);
+
+        break;
+    }
+  }
+
+  protected sendOwnChannels(sender: string) {
+    const join = new Message<NetworkChangeMessage>();
+    const channels = [];
+
+    for (const [channel, circuits] of this.map.entries()) {
+      if (circuits.has(this.circuit.id)) {
+        channels.push(channel);
       }
     }
 
-    throw new Error('No one listening on this channel');
+    if (channels.length) {
+      join.content = {
+        action: 'add',
+        channels: channels,
+      };
+
+      this.circuit.publish('$network.' + sender, join);
+    }
+  }
+
+  async register(...channels: string[]) {
+    channels = channels.filter(c => !c.match(/^\$network/));
+
+    if (channels.length) {
+      for (const channel of channels) {
+        if (!this.map.has(channel)) {
+          this.map.set(channel, new Set());
+        }
+
+        this.map.get(channel).add(this.circuit.id);
+      }
+
+      const msg = new Message<NetworkChangeMessage>();
+      msg.content = {
+        action: 'add',
+        channels,
+      };
+
+      await this.circuit.publish('$network', msg);
+    }
+  }
+
+  async deregister(...channels: string[]) {
+    channels = channels.filter(c => !c.match(/^\$network/));
+
+    if (channels.length) {
+      for (const channel of channels) {
+        if (this.map.has(channel)) {
+          this.map.get(channel).delete(this.circuit.id);
+        }
+      }
+
+      const msg = new Message<NetworkChangeMessage>();
+      msg.content = {
+        action: 'remove',
+        channels,
+      };
+
+      await this.circuit.publish('$network', msg);
+    }
+  }
+
+  find(channel: string): string {
+    if (this.map.has(channel)) {
+      const circuits = Array.from(this.map.get(channel).values());
+
+      if (circuits.length) {
+        // Pick a random circuit.
+        return circuits[0];
+      }
+    }
+
+    throw new NotFoundException();
   }
 }

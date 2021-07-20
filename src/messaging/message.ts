@@ -37,6 +37,6 @@ export class Message<P = string | number | Object | boolean> {
   public content: P;
 
   constructor() {
-    this.createdAt = new Date().getUTCMilliseconds();
+    this.createdAt = Date.now();
   }
 }

@@ -10,7 +10,7 @@ type SumResult = number;
 
 describe('RPC', () => {
   describe('Single Node', () => {
-    test('should respond to request', async () => {
+    test.skip('should respond to request', async () => {
       const c = new Circuit('r0');
       await c.connect();
 

@@ -1,3 +1,5 @@
 import { Message } from '../messaging/message';
 
-export type ISubscribeHandler = (msg: Message) => Promise<void> | void;
+export type ISubscribeHandler<I = any> = (
+  message: Message<I>,
+) => Promise<void> | void;

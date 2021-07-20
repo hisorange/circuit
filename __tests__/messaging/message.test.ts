@@ -4,6 +4,6 @@ describe('Message', () => {
   test('should init a created time', () => {
     const msg = new Message();
 
-    expect(msg.createdAt).toBeLessThanOrEqual(new Date().getUTCMilliseconds());
+    expect(msg.createdAt).toBeLessThanOrEqual(Date.now());
   });
 });
