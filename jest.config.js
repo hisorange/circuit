@@ -1,4 +1,3 @@
-
 /** @type {import("ts-jest/dist/types").InitialOptionsTsJest} */
 const jestConfig = {
   preset: 'ts-jest',
@@ -22,7 +21,13 @@ const jestConfig = {
   collectCoverage: true,
   coverageDirectory: './coverage',
   coverageReporters: ['clover', 'lcov', 'text'],
-  collectCoverageFrom: ['./src/**/*.ts', '!./src/transports/(ioredis).transport.ts', '!**/node_modules/**'],
+  collectCoverageFrom: [
+    './src/**/*.ts',
+    '!./src/transports/(ioredis).transport.ts',
+    '!./src/router.ts',
+    '!./src/**/index.ts',
+    '!**/node_modules/**',
+  ],
   coverageThreshold: {
     global: {
       branches: 10,
@@ -32,6 +37,5 @@ const jestConfig = {
     },
   },
 };
-
 
 module.exports = jestConfig;

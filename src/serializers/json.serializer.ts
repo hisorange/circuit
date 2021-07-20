@@ -6,9 +6,9 @@ export class JsonSerializer implements ISerializer {
     return JSON.stringify(message);
   }
 
-  deserialize(messageString: string): Message {
+  deserialize<C>(messageString: string): Message<C> {
     const messageRaw: Message = JSON.parse(messageString);
-    const message = new Message();
+    const message = new Message<C>();
 
     for (const key in messageRaw) {
       if (Object.prototype.hasOwnProperty.call(messageRaw, key)) {
