@@ -87,7 +87,7 @@ export class InMemoryTransport implements ITransport {
     this.subscribers.get(channel).push(subscriber);
 
     // Change detected, process the existing message queues.
-    this.processQueues();
+    await this.processQueues();
   }
 
   /**
@@ -107,21 +107,21 @@ export class InMemoryTransport implements ITransport {
   /**
    * @description Process the queued messages and dispatch to the subscribers.
    */
-  protected processQueues() {
+  protected async processQueues() {
     // Fetch the active message queues
     for (const [channel, queue] of this.queues.entries()) {
       // Check for active subscriptions
       if (this.subscribers.has(channel)) {
+        // Clear the queue to avoid loop.
+        this.queues.delete(channel);
+
         const subscribers = this.subscribers.get(channel);
 
         for (const subscriber of subscribers) {
           for (const message of queue) {
-            subscriber.handler(message);
+            await subscriber.handler(message);
           }
         }
-
-        // Channel is cleared.
-        this.queues.delete(channel);
       }
     }
   }
