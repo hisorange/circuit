@@ -31,9 +31,6 @@ jobs:
       - name: Expose GIT Commit Data
         uses: rlespinasse/git-commit-data-action@v1.x
 
-      - id: commit_title
-        run: echo "${{ GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}"
-
       - name: Install the Interpreter
         uses: actions/setup-node@v2
         with:
@@ -60,7 +57,7 @@ jobs:
           TEST_TRANSPORT: ioredis
 
     outputs:
-      commit_message: ${{ job.steps.commit_title.stdout }}
+      commit_message: ${{ env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}
 
   # Run publish only when the branch is matches, and the commit message could match a release pattern.
   publish:
