@@ -7,34 +7,11 @@ on:
     branches: [main]
 
 jobs:
-  testing:
-    name: Testing
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build in testing mode
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14.x
-          cache: yarn
-      - run: yarn install
-      - run: yarn build
-      - run: yarn test:ci
-
-      - name: Export coverage
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
     name: Publish Packages
     runs-on: ubuntu-latest
-    needs: testing
-    if: success()
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout
