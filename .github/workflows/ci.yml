@@ -49,22 +49,26 @@ jobs:
         run: yarn build
 
       - name: Test > InMemory Transport
-        run: yarn test:ci
+        run: yarn test
 
       - name: Test > IO Redis Transport
         run: yarn test:ci
         env:
           TEST_TRANSPORT: ioredis
 
+      - name: Display Commit Message
+        run: echo "${{ env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}"
+
     outputs:
       commit_message: ${{ env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}
+      is_release_commit: ${{ startsWith(env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED, 'Release ') }}
 
   # Run publish only when the branch is matches, and the commit message could match a release pattern.
   publish:
     name: Publish Packages
     runs-on: ubuntu-latest
     needs: tests
-    if: ${{ startsWith(needs.tests.outputs.commit_message, 'Release ') && success() && github.ref == 'refs/heads/main' }}
+    if: ${{ needs.tests.outputs.is_release_commit == true && success() && github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Checkout
