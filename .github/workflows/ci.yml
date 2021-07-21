@@ -57,18 +57,17 @@ jobs:
           TEST_TRANSPORT: ioredis
 
       - name: Display Commit Message
-        run: echo "${{ env.GIT_COMMIT_MESSAGE_SUBJECT }}"
+        run: echo "${{ env.GIT_COMMIT_MESSAGE_SUBJECT }} and it's ${{ startsWith(env.GIT_COMMIT_MESSAGE_SUBJECT, 'Release') }}"
 
     outputs:
       commit_message: ${{ env.GIT_COMMIT_MESSAGE_SUBJECT }}
-      is_release_commit: ${{ startsWith(env.GIT_COMMIT_MESSAGE_SUBJECT, 'Release') }}
 
   # Run publish only when the branch is matches, and the commit message could match a release pattern.
   publish:
     name: Publish Packages
     runs-on: ubuntu-latest
     needs: tests
-    if: ${{ needs.tests.outputs.is_release_commit == true && success() && github.ref == 'refs/heads/main' }}
+    if: ${{ startsWith(needs.tests.outputs.commit_message, 'Release') && success() && github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Checkout
