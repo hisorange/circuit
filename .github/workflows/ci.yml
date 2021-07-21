@@ -58,6 +58,7 @@ jobs:
 
     outputs:
       commit_message: ${{ env.GIT_COMMIT_MESSAGE_SUBJECT }}
+      release_name: echo "$(echo ${{ env.GIT_COMMIT_MESSAGE_SUBJECT }} | sed -r 's/Release /v/')"
 
   # Run publish only when the branch is matches, and the commit message could match a release pattern.
   publish:
@@ -116,7 +117,7 @@ jobs:
   release:
     name: Release GH
     runs-on: ubuntu-latest
-    needs: publish
+    needs: [tests, publish]
     if: ${{ success() && needs.publish.outputs.changed == 'true' }}
 
     steps:
@@ -126,8 +127,8 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        name: echo "$(echo ${{ needs.tests.outputs.commit_message }} | sed -r 's/Release //')"
-        tag_name: echo "$(echo ${{ needs.tests.outputs.commit_message }} | sed -r 's/Release /v/')"
+        name: ${{ needs.tests.outputs.release_name }}
+        tag_name: ${{ needs.tests.outputs.release_name }}
         draft: false
         prerelease: false
       env:
@@ -137,7 +138,7 @@ jobs:
   notify:
     name: Notify
     runs-on: ubuntu-latest
-    needs: [publish, release]
+    needs: [tests, publish, release]
     if: ${{ success() }}
 
     steps:
@@ -148,7 +149,7 @@ jobs:
           SLACK_USERNAME: GitHub Release Notification
           SLACK_AVATAR: sender
         with:
-          args: '[${{ github.repository }}] Published the release [${{ env.RELEASE_NAME }}]'
+          args: '[${{ github.repository }}] Published the release [${{ needs.tests.outputs.release_name }}]'
 
 
 
