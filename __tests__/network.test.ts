@@ -203,13 +203,19 @@ describe('Network', () => {
       await node1.subscribe('srv1', () => {});
       await node2.subscribe('srv2', () => {});
 
-      await new Promise(wait => setTimeout(wait, 800));
+      await new Promise(wait => setTimeout(wait, 500));
 
-      expect(node1['network'].find('srv1')).toBe('find1');
-      expect(node1['network'].find('srv2')).toBe('find2');
+      try {
+        expect(node1['network'].find('srv1')).toBe('find1');
+        expect(node1['network'].find('srv2')).toBe('find2');
 
-      expect(node2['network'].find('srv1')).toBe('find1');
-      expect(node2['network'].find('srv2')).toBe('find2');
+        expect(node2['network'].find('srv1')).toBe('find1');
+        expect(node2['network'].find('srv2')).toBe('find2');
+      } catch (error) {
+        await t.disconnect();
+
+        throw error;
+      }
 
       await t.disconnect();
     }, 2000);
