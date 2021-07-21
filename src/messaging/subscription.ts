@@ -6,4 +6,6 @@ export class Subscription implements ISubscription {
   readonly id: string = UUID.v4();
 
   constructor(readonly handler: ISubscribeHandler | IRequestHandler) {}
+
+  async unsubscribe(): Promise<void> {}
 }

@@ -24,7 +24,6 @@ const jestConfig = {
   collectCoverageFrom: [
     './src/**/*.ts',
     '!./src/transports/(ioredis).transport.ts',
-    '!./src/router.ts',
     '!./src/**/index.ts',
     '!**/node_modules/**',
   ],
