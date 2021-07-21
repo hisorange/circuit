@@ -107,8 +107,8 @@ jobs:
     - name: Create release
       uses: softprops/action-gh-release@v1
       with:
-        name: echo "$GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //'"
-        tag_name: echo "$GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //'"
+        name: "echo $GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //'"
+        tag_name: "echo $GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //'"
         draft: false
         prerelease: false
       env:
