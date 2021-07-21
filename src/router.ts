@@ -22,7 +22,7 @@ export class Router {
     this.replySub = this.registerReceiver();
   }
 
-  disconnect() {
+  disconnect(): void {
     for (const [timer] of this.forwardHandlers.values()) {
       if (timer) {
         clearTimeout(timer);
@@ -32,7 +32,7 @@ export class Router {
     // Destroy the sub here...
   }
 
-  protected registerReceiver() {
+  protected registerReceiver(): ISubscription {
     const subscription = new Subscription(this.dispatch.bind(this));
     this.transport.subscribe(this.replyTo, subscription);
 
@@ -43,7 +43,7 @@ export class Router {
     return `$router.${this.circuitId}`;
   }
 
-  protected dispatch(message: Message) {
+  protected dispatch(message: Message): void {
     if (message.replyFor && this.forwardHandlers.has(message.replyFor)) {
       const [timer, handler] = this.forwardHandlers.get(message.replyFor);
 
@@ -57,10 +57,7 @@ export class Router {
     }
   }
 
-  doRequest<I, O>(
-    request: Message<I>,
-    ttl: number = 60_000,
-  ): Promise<Message<O>> {
+  doRequest<I, O>(request: Message<I>, ttl = 60_000): Promise<Message<O>> {
     // Change or assign the reply channel to the router.
     request.replyTo = this.replyTo;
     request.timeToLive = ttl;

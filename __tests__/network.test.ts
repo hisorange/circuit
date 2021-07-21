@@ -2,12 +2,12 @@ import { Circuit } from '../src';
 import { NotFoundException } from '../src/exceptions';
 import { NetworkChangeMessage } from '../src/interfaces';
 import { Message } from '../src/messaging/message';
-import { InMemoryTransport } from '../src/transports';
+import { createTransport } from './utils';
 
 describe('Network', () => {
   describe('Single Circuit', () => {
     test('should register channels', async () => {
-      const c = new Circuit('c1');
+      const c = new Circuit();
       await c.connect();
 
       jest.spyOn(c['network'], 'register');
@@ -22,7 +22,7 @@ describe('Network', () => {
     });
 
     test('should deregister channels', async () => {
-      const c = new Circuit('c1');
+      const c = new Circuit();
       await c.connect();
 
       jest.spyOn(c['network'], 'register');
@@ -40,10 +40,10 @@ describe('Network', () => {
       expect(c['network']['register']).toHaveBeenNthCalledWith(1, 'a');
       expect(c['network']['register']).toHaveBeenNthCalledWith(2, 'b');
 
-      // Deregistering
+      // Deregister
       expect(c['network']['deregister']).toHaveBeenCalledWith(
         '$network',
-        '$network.c1',
+        '$network.' + c.id,
         'a',
         'b',
       );
@@ -52,22 +52,24 @@ describe('Network', () => {
     });
 
     test('should find local channels', async () => {
-      const c = new Circuit('c1');
+      const c = new Circuit();
       await c.connect();
 
       await c.subscribe('a', () => {});
       await c.subscribe('b', () => {});
 
-      expect(c['network'].find('a')).toBe('c1');
-      expect(c['network'].find('b')).toBe('c1');
+      expect(c['network'].find('a')).toBe(c.id);
+      expect(c['network'].find('b')).toBe(c.id);
 
       expect(() => c['network'].find('c')).toThrow(NotFoundException);
+
+      await c.disconnect();
     });
   });
 
   describe('Change Messages', () => {
     test('should add channels', async () => {
-      const c = new Circuit('b1');
+      const c = new Circuit();
       await c.connect();
       const n = c['network'];
 
@@ -75,7 +77,7 @@ describe('Network', () => {
 
       const addMsg = new Message<NetworkChangeMessage>();
       addMsg.sender = 'b2';
-      addMsg.recipient = 'b1';
+      addMsg.recipient = c.id;
       addMsg.content = {
         action: 'add',
         channels: ['a', 'b'],
@@ -85,11 +87,13 @@ describe('Network', () => {
 
       expect(n.find('a')).toBe('b2');
       expect(n.find('b')).toBe('b2');
-      expect(n.find('c')).toBe('b1');
+      expect(n.find('c')).toBe(c.id);
+
+      await c.disconnect();
     });
 
     test('should remove channels', async () => {
-      const c = new Circuit('b1');
+      const c = new Circuit();
       await c.connect();
       const n = c['network'];
 
@@ -97,7 +101,7 @@ describe('Network', () => {
 
       const addMsg = new Message<NetworkChangeMessage>();
       addMsg.sender = 'b2';
-      addMsg.recipient = 'b1';
+      addMsg.recipient = c.id;
       addMsg.content = {
         action: 'add',
         channels: ['a', 'b'],
@@ -116,11 +120,13 @@ describe('Network', () => {
 
       expect(() => n.find('a')).toThrow(NotFoundException);
       expect(n.find('b')).toBe('b2');
-      expect(n.find('c')).toBe('b1');
+      expect(n.find('c')).toBe(c.id);
+
+      await c.disconnect();
     });
 
-    test('should respond to join annonuncment', async () => {
-      const c = new Circuit('b1');
+    test('should respond to join announcement', async () => {
+      const c = new Circuit();
 
       const publish = jest.spyOn(c, 'publish');
 
@@ -178,43 +184,62 @@ describe('Network', () => {
           }),
         }),
       );
+
+      await c.disconnect();
     });
   });
 
   describe('Multi Circuit', () => {
     test('should find remote channels', async () => {
-      const t = new InMemoryTransport();
+      const t = createTransport();
+      await t.connect();
 
-      const m1 = new Circuit('m1', t);
-      const m2 = new Circuit('m2', t);
-      await m1.connect();
-      await m1.subscribe('a', () => {});
-      await m2.connect();
+      const node1 = new Circuit('find1', t);
+      const node2 = new Circuit('find2', t);
 
-      await m2.subscribe('b', () => {});
+      await node1.connect();
+      await node2.connect();
 
-      // Local
-      expect(m1['network'].find('a')).toBe('m1');
-      expect(m2['network'].find('b')).toBe('m2');
+      await node1.subscribe('srv1', () => {});
+      await node2.subscribe('srv2', () => {});
 
-      expect(m2['network'].find('a')).toBe('m1');
-      //expect(m2['network'].find('b')).toBe('m2');
-    });
+      await new Promise(wait => setTimeout(wait, 200));
+
+      expect(node1['network'].find('srv1')).toBe('find1');
+      expect(node1['network'].find('srv2')).toBe('find2');
+
+      expect(node2['network'].find('srv1')).toBe('find1');
+      expect(node2['network'].find('srv2')).toBe('find2');
+
+      await t.disconnect();
+    }, 800);
   });
 
-  test('should retrive in round robin', async () => {
-    const t = new InMemoryTransport();
+  test('should retrieve in round robin', async () => {
+    const t = createTransport();
+    await t.connect();
 
-    const m1 = new Circuit('m1', t);
-    const m2 = new Circuit('m2', t);
-    await m1.connect();
-    await m2.connect();
-    await m1.subscribe('a', () => {});
-    await m2.subscribe('a', () => {});
+    const node1 = new Circuit('rr1', t);
+    const node2 = new Circuit('rr2', t);
 
-    expect(m1['network'].find('a')).toBe('m1');
-    expect(m1['network'].find('a')).toBe('m2');
-    expect(m2['network'].find('a')).toBe('m1');
-    expect(m2['network'].find('a')).toBe('m2');
-  });
+    await node1.connect();
+    await node2.connect();
+
+    await node1.subscribe('ag', () => {});
+    await node2.subscribe('ag', () => {});
+
+    await new Promise(wait => setTimeout(wait, 200));
+
+    const resultM1 = [node1['network'].find('ag'), node1['network'].find('ag')];
+
+    expect(resultM1).toContain('rr1');
+    expect(resultM1).toContain('rr2');
+
+    const resultM2 = [node2['network'].find('ag'), node2['network'].find('ag')];
+
+    expect(resultM2).toContain('rr1');
+    expect(resultM2).toContain('rr2');
+
+    await t.disconnect();
+  }, 500);
 });

@@ -12,7 +12,7 @@ export class Network {
   protected circuit: Circuit;
   protected roundRobin: { [K in string]: number } = {};
 
-  bind(circuit: Circuit) {
+  bind(circuit: Circuit): void {
     this.circuit = circuit;
     this.circuit.subscribe('$network', this.handleNetworkChange.bind(this));
     this.circuit.subscribe(
@@ -24,7 +24,7 @@ export class Network {
   }
 
   // Send a join and ask the networks to whisper their messages.
-  protected sendJoinMessage() {
+  protected sendJoinMessage(): void {
     const msg = new Message<NetworkChangeMessage>();
     msg.content = {
       action: 'join',
@@ -70,7 +70,7 @@ export class Network {
     }
   }
 
-  protected sendOwnChannels(sender: string) {
+  protected sendOwnChannels(sender: string): void {
     const join = new Message<NetworkChangeMessage>();
     const channels = [];
 
@@ -90,7 +90,7 @@ export class Network {
     }
   }
 
-  async register(...channels: string[]) {
+  async register(...channels: string[]): Promise<void> {
     channels = channels.filter(c => !c.match(/^\$network/));
 
     if (channels.length) {
@@ -112,7 +112,7 @@ export class Network {
     }
   }
 
-  async deregister(...channels: string[]) {
+  async deregister(...channels: string[]): Promise<void> {
     channels = channels.filter(c => !c.match(/^\$network/));
 
     if (channels.length) {

@@ -18,7 +18,7 @@ export class InMemoryTransport implements ITransport {
   /**
    * @description Local interval used to process queues more like a remote server would.
    */
-  protected connection: boolean = false;
+  protected connection = false;
 
   /**
    * @description Store messages grouped by channels.
@@ -32,11 +32,11 @@ export class InMemoryTransport implements ITransport {
 
   readonly serializer: ISerializer;
 
-  isConnected() {
+  isConnected(): boolean {
     return this.connection;
   }
 
-  async connect() {
+  async connect(): Promise<void> {
     if (this.isConnected()) {
       throw new AlreadyConnectedException();
     }
@@ -48,7 +48,7 @@ export class InMemoryTransport implements ITransport {
     this.connection = true;
   }
 
-  async disconnect() {
+  async disconnect(): Promise<void> {
     if (!this.isConnected()) {
       throw new NotConnectedException();
     }
@@ -95,21 +95,21 @@ export class InMemoryTransport implements ITransport {
   /**
    * @description Clear the message queue reference.
    */
-  protected clearMessageQueues() {
+  protected clearMessageQueues(): void {
     this.queues = new Map<string, Message[]>();
   }
 
   /**
    * @description Clear the message queue reference.
    */
-  protected clearSubscribers() {
+  protected clearSubscribers(): void {
     this.subscribers = new Map<string, ISubscription[]>();
   }
 
   /**
    * @description Process the queued messages and dispatch to the subscribers.
    */
-  protected async processQueues() {
+  protected async processQueues(): Promise<void> {
     // Fetch the active message queues
     for (const [channel, queue] of this.queues.entries()) {
       // Check for active subscriptions

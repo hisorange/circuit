@@ -1,6 +1,6 @@
 import UUID = require('uuid');
 
-export class Message<P = string | number | Object | boolean> {
+export class Message<P = string | number | unknown | boolean> {
   /**
    * @description Unique message ID will be used for reply tracking.
    */

@@ -37,18 +37,21 @@ describe('IO Redis Transport', () => {
     const t1 = new IoRedisTransport();
     const t2 = new IoRedisTransport();
 
-    const c1 = new Circuit('c1', t1);
+    const c1 = new Circuit(undefined, t1);
     await c1.connect();
-    const c2 = new Circuit('c2', t2);
+    const c2 = new Circuit(undefined, t2);
     await c2.connect();
 
-    c1.subscribe('test', async (msg: Message) => {
+    await c1.subscribe('test', async (msg: Message) => {
       expect(msg.content).toBe('testMsg');
-
-      await c1.disconnect();
-      await c2.disconnect();
     });
 
-    c2.publish('test', 'testMsg');
+    await c2.publish('test', 'testMsg');
+
+    await c1.disconnect();
+    await c2.disconnect();
+
+    expect(t1.isConnected()).toBe(false);
+    expect(t2.isConnected()).toBe(false);
   }, 200);
 });

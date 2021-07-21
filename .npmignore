@@ -1,12 +1,15 @@
 __tests__/
 .github
-.prettierrc
 .vscode
 build/*.spec.js
 build/**/*.spec.js
-jest.config.js
 coverage/
 src/
+.eslintigore
+.eslintrc.js
+.prettierrc
+docker-compose.yml
+jest.config.js
 tsconfig.dev.json
 tsconfig.json
 tsconfig.prod.json

@@ -7,6 +7,10 @@ import { Subscription } from '../../src/messaging/subscription';
 import { InMemoryTransport } from '../../src/transports';
 
 describe('In Memory Transport', () => {
+  if (process.env.TEST_TRANSPORT) {
+    test = test.skip;
+  }
+
   describe('Connection', () => {
     test('should connect', async () => {
       const t = new InMemoryTransport();
@@ -41,6 +45,8 @@ describe('In Memory Transport', () => {
       await t.connect();
 
       expect(() => t.connect()).rejects.toThrow(AlreadyConnectedException);
+
+      await t.disconnect();
     });
 
     test('should throw on non existing connection', async () => {

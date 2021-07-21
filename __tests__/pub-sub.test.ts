@@ -3,7 +3,7 @@ import { Subscription } from '../src/messaging/subscription';
 
 describe('Publish Subscribe', () => {
   test('should transport the message', async () => {
-    const c = new Circuit('n1');
+    const c = new Circuit();
     await c.connect();
 
     await c.subscribe('test1', msg => {
@@ -15,7 +15,7 @@ describe('Publish Subscribe', () => {
   }, 50);
 
   test('should create a subscription', async () => {
-    const c = new Circuit('n1');
+    const c = new Circuit();
     await c.connect();
 
     jest.spyOn(c['transport'], 'subscribe');

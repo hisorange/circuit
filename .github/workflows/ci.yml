@@ -1,0 +1,56 @@
+name: 'CI'
+
+on:
+  push:
+    paths:
+      - '**.(ts|js|json)'
+  pull_request:
+    paths:
+      - '**.(ts|js|json)'
+
+jobs:
+  testing:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:latest
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Preparing the environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          cache: yarn
+      - name: Install the dependencies
+        run: yarn install
+      - name: Build
+        run: yarn build
+
+      # Test IORedis
+      - name: Test > IO Redis Transport
+        run: yarn test
+        env:
+          TEST_TRANSPORT: ioredis
+
+      # Test InMemory
+      - name: Final Test > InMemory Transport
+        run: yarn test:ci
+

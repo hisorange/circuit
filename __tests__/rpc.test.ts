@@ -1,5 +1,5 @@
 import { Circuit } from '../src';
-import { InMemoryTransport } from '../src/transports';
+import { createTransport } from './utils';
 
 interface SumRequest {
   a: number;
@@ -11,7 +11,7 @@ type SumResult = number;
 describe('RPC', () => {
   describe('Single Node', () => {
     test('should respond to request', async () => {
-      const c = new Circuit('r0');
+      const c = new Circuit();
       await c.connect();
 
       c.respond<SumRequest, SumResult>('sum', msg => {
@@ -31,11 +31,11 @@ describe('RPC', () => {
 
   describe('Multi Node', () => {
     test('should respond to request', async () => {
-      const t = new InMemoryTransport();
+      const t = createTransport();
 
-      const c1 = new Circuit('r1', t);
+      const c1 = new Circuit(undefined, t);
       await c1.connect();
-      const c2 = new Circuit('r2', t);
+      const c2 = new Circuit(undefined, t);
       await c2.connect();
 
       await c1.respond<SumRequest, SumResult>('sum', msg => {

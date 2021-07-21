@@ -10,7 +10,7 @@ const jestConfig = {
   silent: true,
   verbose: true,
 
-  // Typescipt compiler configuration.
+  // Typescript compiler configuration.
   globals: {
     'ts-jest': {
       tsConfig: 'tsconfig.test.json',
@@ -23,9 +23,9 @@ const jestConfig = {
   coverageReporters: ['clover', 'lcov', 'text'],
   collectCoverageFrom: [
     './src/**/*.ts',
-    '!./src/transports/(ioredis).transport.ts',
     '!./src/**/index.ts',
     '!**/node_modules/**',
+    '!./src/transports/**', // Coverage for the transports is not useful, since they run on different rounds.
   ],
   coverageThreshold: {
     global: {

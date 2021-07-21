@@ -11,7 +11,7 @@ import { Router } from './router';
 import { InMemoryTransport } from './transports';
 import UUID = require('uuid');
 
-type MessageContent = string | number | Object | boolean;
+type MessageContent = string | number | unknown | boolean;
 
 export class Circuit {
   protected network: Network;
@@ -28,23 +28,22 @@ export class Circuit {
     }
   }
 
-  async connect() {
+  async connect(): Promise<void> {
     if (!this.transport.isConnected()) {
       await this.transport.connect();
     }
 
     this.network = new Network();
     this.network.bind(this);
-
     this.router = new Router(this.id, this.transport);
   }
 
-  async disconnect() {
+  async disconnect(): Promise<void> {
     this.router.disconnect();
 
     // Disconnect the transport.
     if (this.transport.isConnected()) {
-      // Annonunce the remove, so the network will forget about us.
+      // Announce the remove, so the network will forget about us.
       await this.network.deregister(...Array.from(this.subscriptions.keys()));
 
       await this.transport.disconnect();
@@ -54,7 +53,10 @@ export class Circuit {
   /**
    * @description Request the execution of a registered action.
    */
-  async request<I = any, O = any>(channel: string, content: I): Promise<O> {
+  async request<I = unknown, O = unknown>(
+    channel: string,
+    content: I,
+  ): Promise<O> {
     const request = new Message<I>();
     request.sender = this.id;
     request.channel = channel;
@@ -64,7 +66,7 @@ export class Circuit {
     return (await this.router.doRequest<I, O>(request)).content;
   }
 
-  async respond<I = any, O = any>(
+  async respond<I = unknown, O = unknown>(
     channel: string,
     handler: IRequestHandler<I, O>,
   ): Promise<ISubscription> {
@@ -80,7 +82,10 @@ export class Circuit {
   /**
    * @description Publish a message every listener on the channel.
    */
-  async publish(channel: string, content: MessageContent | Message) {
+  async publish(
+    channel: string,
+    content: MessageContent | Message,
+  ): Promise<void> {
     let msg: Message;
 
     if (content instanceof Message) {
@@ -99,7 +104,7 @@ export class Circuit {
   /**
    * @description Subscribe to a channel which actuates the given handler on receive.
    */
-  async subscribe<I = any>(
+  async subscribe<I = unknown>(
     channel: string,
     handler: ISubscribeHandler<I>,
   ): Promise<ISubscription> {

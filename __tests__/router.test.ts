@@ -1,12 +1,13 @@
-import { InMemoryTransport, TimeoutException } from '../src';
+import { TimeoutException } from '../src';
 import { Message } from '../src/messaging/message';
 import { Subscription } from '../src/messaging/subscription';
 import { Router } from '../src/router';
+import { createTransport } from './utils';
 
 describe('Router', () => {
   test('should initialize', async () => {
-    const id = 'r1';
-    const t = new InMemoryTransport();
+    const id = 'node1';
+    const t = createTransport();
     await t.connect();
 
     const r = new Router(id, t);
@@ -15,17 +16,18 @@ describe('Router', () => {
     expect(r['replySub']).toBeInstanceOf(Subscription);
 
     await t.disconnect();
+    r.disconnect();
   });
 
   test('should create a reply channel and subscribe to it', async () => {
-    const t = new InMemoryTransport();
+    const t = createTransport();
     await t.connect();
     jest.spyOn(t, 'subscribe');
 
-    const r = new Router('r1', t);
+    const r = new Router('node1', t);
 
     expect(t.subscribe).toHaveBeenCalledWith(
-      expect.stringMatching(/\$router\.r1/),
+      expect.stringMatching(/\$router\.node1/),
       expect.any(Subscription),
     );
 
@@ -34,9 +36,7 @@ describe('Router', () => {
   });
 
   test('should package the request and handle timeout', async () => {
-    jest.useFakeTimers();
-
-    const t = new InMemoryTransport();
+    const t = createTransport();
     await t.connect();
     const r = new Router('r1', t);
 
@@ -46,17 +46,18 @@ describe('Router', () => {
     req.recipient = 'r2';
     req.channel = 'sum';
 
-    const m = r.doRequest(req, 50_000);
+    const m = r.doRequest(req, 50);
     expect(m).rejects.toThrow(TimeoutException);
 
     expect(t.publish).toHaveBeenCalledWith('r2.sum', req);
 
     expect(req.replyTo).toBe('$router.r1');
-    expect(req.timeToLive).toBe(50_000);
+    expect(req.timeToLive).toBe(50);
 
-    jest.advanceTimersByTime(50_000);
+    // Fake timers somehow confuses the redis client?
+    new Promise(wait => setTimeout(wait, 60));
 
-    await t.disconnect();
     r.disconnect();
-  });
+    await t.disconnect();
+  }, 2000);
 });

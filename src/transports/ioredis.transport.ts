@@ -26,11 +26,11 @@ export class IoRedisTransport implements ITransport {
 
   constructor(protected config: Redis.RedisOptions = undefined) {}
 
-  isConnected() {
+  isConnected(): boolean {
     return !!this.pubCon;
   }
 
-  async connect() {
+  async connect(): Promise<void> {
     if (this.isConnected()) {
       throw new AlreadyConnectedException();
     }
@@ -50,20 +50,16 @@ export class IoRedisTransport implements ITransport {
     this.subCon.on('message', this.subscribeRouter.bind(this));
   }
 
-  async disconnect() {
+  async disconnect(): Promise<void> {
     if (!this.isConnected()) {
       throw new NotConnectedException();
     }
 
     this.subCon.off('message', this.subscribeRouter.bind(this));
-    if (this.subCon.status !== 'close') {
-      this.subCon.disconnect();
-    }
+    this.subCon.disconnect();
     this.subCon = null;
 
-    if (this.pubCon.status !== 'close') {
-      this.pubCon.disconnect();
-    }
+    this.pubCon.disconnect();
     this.pubCon = null;
 
     // Clear leftovers
@@ -92,7 +88,10 @@ export class IoRedisTransport implements ITransport {
     await this.subCon.subscribe(channel);
   }
 
-  protected async subscribeRouter(channel: string, messageString: string) {
+  protected async subscribeRouter(
+    channel: string,
+    messageString: string,
+  ): Promise<void> {
     const message = this.serializer.deserialize(messageString);
 
     // Check for active subscriptions
@@ -108,7 +107,7 @@ export class IoRedisTransport implements ITransport {
   /**
    * @description Clear the message queue references.
    */
-  protected clearSubscribers() {
+  protected clearSubscribers(): void {
     this.subscribers = new Map<string, ISubscription[]>();
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@hisorange/circuit",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Versatile messaging library with support for multiple transport medium.",
   "keywords": [
     "messaging",
@@ -31,8 +31,10 @@
   },
   "homepage": "https://github.com/hisorange/circuit",
   "scripts": {
-    "test": "jest --collectCoverage=0",
-    "test:cover": "jest",
+    "test": "jest --collectCoverage=0 --runInBand",
+    "test:ci": "jest --runInBand",
+    "pretest:ci": "eslint .",
+    "lint": "eslint --fix .",
     "build": "rimraf build && tsc -p tsconfig.dev.json",
     "build:watch": "rimraf build && tsc -p tsconfig.dev.json --watch",
     "build:prod": "rimraf build && tsc -p tsconfig.prod.json"
@@ -42,7 +44,13 @@
     "@types/jest": "^26.0.23",
     "@types/node": "^15.0.2",
     "@types/uuid": "^8.3.1",
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "@typescript-eslint/parser": "^4.28.4",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
     "jest": "^27.0.3",
+    "prettier": "^2.3.2",
     "ts-jest": "^27.0.2",
     "typescript": "^4.2.4"
   },
