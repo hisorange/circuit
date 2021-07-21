@@ -57,11 +57,11 @@ jobs:
           TEST_TRANSPORT: ioredis
 
       - name: Display Commit Message
-        run: echo "${{ env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}"
+        run: echo "${{ env.GIT_COMMIT_MESSAGE_SUBJECT }}"
 
     outputs:
-      commit_message: ${{ env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}
-      is_release_commit: ${{ startsWith(env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED, 'Release ') }}
+      commit_message: ${{ env.GIT_COMMIT_MESSAGE_SUBJECT }}
+      is_release_commit: ${{ startsWith(env.GIT_COMMIT_MESSAGE_SUBJECT, 'Release') }}
 
   # Run publish only when the branch is matches, and the commit message could match a release pattern.
   publish:
