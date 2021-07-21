@@ -110,8 +110,8 @@ jobs:
     - name: Create release
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ $RELEASE_NAME }}
-        tag_name: ${{ $RELEASE_TAG }}
+        name: ${{ env.RELEASE_NAME }}
+        tag_name: ${{ env.RELEASE_TAG }}
         draft: false
         prerelease: false
       env:
