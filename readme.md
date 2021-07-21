@@ -3,7 +3,7 @@
 ## Circuit - Versatile Messaging Solution written in Typescript
 
 [![Version](https://badge.fury.io/gh/hisorange%2Fcircuit.svg)](https://badge.fury.io/gh/hisorange%2Fcircuit)
-[![Build](https://github.com/hisorange/circuit/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/hisorange/circuit/actions/workflows/publish.yml)
+[![Build](https://github.com/hisorange/circuit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hisorange/circuit/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/hisorange/circuit/badge.svg)](https://coveralls.io/github/hisorange/circuit)
 [![GitHub license](https://img.shields.io/github/license/hisorange/circuit)](https://github.com/hisorange/circuit/blob/main/LICENSE)
 

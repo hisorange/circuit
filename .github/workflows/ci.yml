@@ -2,11 +2,17 @@ name: 'CI'
 
 on:
   push:
-    # paths:
-    #   - '**.(ts|js|json|yml)'
+    paths:
+      - '**.ts'
+      - '**.js'
+      - '**.yml'
+      - '**.json'
   pull_request:
-    # paths:
-    #   - '**.(ts|js|json|yml)'
+    paths:
+      - '**.ts'
+      - '**.js'
+      - '**.yml'
+      - '**.json'
 
 jobs:
   tests:
