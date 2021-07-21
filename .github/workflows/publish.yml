@@ -87,6 +87,6 @@ jobs:
           SLACK_USERNAME: GitHub Circuit Actions
           SLACK_AVATAR: repository
         uses: Ilshidur/action-slack@2.1.0
-          with:
-            args: 'New version has been published!'
+        with:
+          args: 'New version has been published!'
 
