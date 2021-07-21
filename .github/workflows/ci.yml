@@ -95,18 +95,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
+      - name: Change the Interpreter for GPR
+        if: ${{  steps.npm-publish.outputs.changed == 'true' }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@hisorange'
+          cache: yarn
+
       - name: Publish to GPR
-        if: ${{ steps.npm-publish.outputs.changed == true || steps.npm-publish.outputs.changed == 'true' }}
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
-          echo '@hisorange:registry=https://npm.pkg.github.com' >> ~/.npmrc
-          yarn login --registry=https://npm.pkg.github.com --scope=@hisorange
-          yarn publish --non-interactive
+        if: ${{ steps.npm-publish.outputs.changed == 'true' }}
+        run: yarn publish --non-interactive
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     outputs:
-      changed: ${{ steps.npm-publish.outputs.changed == true || steps.npm-publish.outputs.changed == 'true' }}
+      changed: ${{ steps.npm-publish.outputs.changed == 'true' }}
 
   release:
     name: Release GH
