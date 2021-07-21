@@ -109,9 +109,9 @@ jobs:
         echo "RELEASE_TAG=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release /v/')" >> $GITHUB_ENV
 
     - name: Create release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       with:
-        release_name: ${{ env.RELEASE_NAME }}
+        name: ${{ env.RELEASE_NAME }}
         tag_name: ${{ env.RELEASE_TAG }}
         draft: false
         prerelease: false
