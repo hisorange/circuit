@@ -1,14 +1,16 @@
 {
   "name": "@hisorange/circuit",
   "version": "0.2.0",
-  "description": "Messaging bus with multiple transport layer support.",
+  "description": "Versatile messaging library with support for multiple transport medium.",
   "keywords": [
     "messaging",
     "message-bus",
     "rpc",
     "pubsub",
     "transport",
-    "broker"
+    "broker",
+    "typescript",
+    "redis"
   ],
   "main": "./build/index.js",
   "repository": {
@@ -18,11 +20,16 @@
   "bugs": {
     "url": "https://github.com/hisorange/circuit/issues"
   },
-  "author": "Zsolt Varga <hello@hisorange.me>",
+  "author": {
+    "name": "Varga Zsolt",
+    "email": "hello@hisorange.me",
+    "url": "https://hisorange.me"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
+  "homepage": "https://github.com/hisorange/circuit",
   "scripts": {
     "test": "jest --collectCoverage=0",
     "test:cover": "jest",
