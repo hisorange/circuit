@@ -1,15 +1,15 @@
 name: 'CI'
 
-on: [push, pull_request]
-  # push:
-  #   paths:
-  #     - '**.(ts|js|json)'
-  # pull_request:
-  #   paths:
-  #     - '**.(ts|js|json)'
+on:
+  push:
+    paths:
+      - '**.(ts|js|json|yml)'
+  pull_request:
+    paths:
+      - '**.(ts|js|json|yml)'
 
 jobs:
-  testing:
+  tests:
     name: Test
     runs-on: ubuntu-latest
 
@@ -28,66 +28,77 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Cache dependencies
+      - name: Expose GIT Commit Data
+        uses: rlespinasse/git-commit-data-action@v1.x
+
+      - name: Install the Interpreter
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          cache: yarn
+
+      - name: Load the Cached Dependencies
         uses: actions/cache@v2
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Preparing the environment
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14.x
-          cache: yarn
-      - name: Install the dependencies
+      - name: Install Dependencies
         run: yarn install
-      - name: Build
+      - name: Execute the Development Build
         run: yarn build
 
-      # Test IORedis
+      - name: Test > InMemory Transport
+        run: yarn test:ci
+
       - name: Test > IO Redis Transport
-        run: yarn test
+        run: yarn test:ci
         env:
           TEST_TRANSPORT: ioredis
 
-      # Test InMemory
-      - name: Final Test > InMemory Transport
-        run: yarn test:ci
+    outputs:
+      commit_message: ${{ GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}
 
-
+  # Run publish only when the branch is matches, and the commit message could match a release pattern.
   publish:
     name: Publish Packages
     runs-on: ubuntu-latest
-    needs: testing
-    if: ${{ success() && github.ref == 'refs/heads/main' }}
+    needs: tests
+    if: ${{ startsWith(needs.tests.outputs.commit_message, 'Release ') && success() && github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build in production mode
+      - name: Install the Interpreter
         uses: actions/setup-node@v2
         with:
           node-version: 14.x
-      - run: yarn install
-      - run: yarn build:prod
+          cache: yarn
 
-      - name: NPM publish
+      - name: Load the Cached Dependencies
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Dependencies
+        run: yarn install
+      - name: Execute the Production Build
+        run: yarn build:prod
+
+      - name: Publish to NPM
         id: npm-publish
         uses: pascalgn/npm-publish-action@1.3.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
-      - name: GPM publish
+      - name: Publish to GPR
         if: ${{ steps.npm-publish.outputs.changed == true }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14.x
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@hisorange'
-      - run: yarn publish --non-interactive
-        if: ${{ steps.npm-publish.outputs.changed == true }}
+        run: |
+          yarn config set registry-url https://npm.pkg.github.com
+          yarn publish --non-interactive
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -98,26 +109,17 @@ jobs:
     name: Release GH
     runs-on: ubuntu-latest
     needs: publish
-    if: ${{ needs.publish.outputs.changed == true }}
+    if: ${{ success() && needs.publish.outputs.changed == true }}
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Expose git commit data
-      uses: rlespinasse/git-commit-data-action@v1.x
-
-    - run: |
-        echo "RELEASE_NAME=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release //')" >> $GITHUB_ENV
-
-    - run: |
-        echo "RELEASE_TAG=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release /v/')" >> $GITHUB_ENV
-
-    - name: Create release
+    - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ env.RELEASE_NAME }}
-        tag_name: ${{ env.RELEASE_TAG }}
+        name: echo "$(echo ${{ needs.tests.outputs.commit_message }} | sed -r 's/Release //')"
+        tag_name: echo "$(echo ${{ needs.tests.outputs.commit_message }} | sed -r 's/Release /v/')"
         draft: false
         prerelease: false
       env:
@@ -128,10 +130,10 @@ jobs:
     name: Notify
     runs-on: ubuntu-latest
     needs: [publish, release]
-    if: ${{ needs.publish.outputs.changed }}
+    if: ${{ success() &&  needs.publish.outputs.changed }}
 
     steps:
-      - name: Notify the authors
+      - name: Notify the Author(s)
         uses: Ilshidur/action-slack@2.1.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
