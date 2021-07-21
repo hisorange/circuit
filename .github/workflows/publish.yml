@@ -62,7 +62,7 @@ jobs:
   notify-success:
     name: Notify Success
     runs-on: ubuntu-latest
-    needs: release
+    needs: publish
     if: success()
 
     steps:
