@@ -74,6 +74,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14.x
+          always-auth: true
           cache: yarn
 
       - name: Load the Cached Dependencies
@@ -97,7 +98,9 @@ jobs:
       - name: Publish to GPR
         if: ${{ steps.npm-publish.outputs.changed == true || steps.npm-publish.outputs.changed == 'true' }}
         run: |
-          yarn config set registry-url https://npm.pkg.github.com
+          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
+          echo '@hisorange:registry=https://npm.pkg.github.com' >> ~/.npmrc
+          yarn login --registry=https://npm.pkg.github.com --scope=@hisorange
           yarn publish --non-interactive
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
