@@ -104,11 +104,14 @@ jobs:
     - name: Expose git commit data
       uses: rlespinasse/git-commit-data-action@v1.x
 
+    - run: "export RELEASE_NAME=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release //')"
+    - run: "export RELEASE_TAG=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release /v/')"
+
     - name: Create release
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ $GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //'}}
-        tag_name: ${{ $GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //' }}
+        name: ${{ $RELEASE_NAME }}
+        tag_name: ${{ $RELEASE_TAG }}
         draft: false
         prerelease: false
       env:
