@@ -2,6 +2,10 @@
 
 ---
 
+##### 0.2.x
+
+- Experimenting with GitHub actions and DevOps
+
 ##### 0.2.0
 
 - Decouple the serializer from the IORedis transport
