@@ -1,5 +1,11 @@
-![Circuit Logo](https://user-images.githubusercontent.com/3441017/126361006-5272a10e-d123-404d-90ea-60a832258eec.png)
----
+## ![Circuit Logo](https://user-images.githubusercontent.com/3441017/126361006-5272a10e-d123-404d-90ea-60a832258eec.png)
+
+## Circuit - Versatile Messaging written in Typescript
+
+[![Version](https://badge.fury.io/gh/hisorange%2Fcircuit.svg)](https://badge.fury.io/gh/hisorange%2Fcircuit)
+[![Build](https://github.com/hisorange/circuit/actions/workflows/actions.yml/badge.svg?branch=main)](https://github.com/hisorange/circuit/actions/workflows/actions.yml)
+[![Coverage Status](https://coveralls.io/repos/github/hisorange/circuit/badge.svg)](https://coveralls.io/github/hisorange/circuit)
+[![GitHub license](https://img.shields.io/github/license/hisorange/circuit)](https://github.com/hisorange/circuit/blob/main/LICENSE)
 
 ### Quick Start
 

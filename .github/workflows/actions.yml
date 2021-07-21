@@ -1,4 +1,4 @@
-name: 'NPM Publish'
+name: 'Build'
 on:
   push:
     branches:
@@ -21,6 +21,11 @@ jobs:
       - run: yarn test:cover
         env:
           CI: true
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: GitHub Test on Slack
         if: success()
