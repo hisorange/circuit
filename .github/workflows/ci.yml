@@ -102,11 +102,11 @@ jobs:
     - name: Expose git commit data
       uses: rlespinasse/git-commit-data-action@v1.x
 
-    - run: "export RELEASE_NAME=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release //')"
-    - run: "export RELEASE_TAG=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release /v/')"
+    - run: |
+        echo "RELEASE_NAME=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release //')" >> $GITHUB_ENV
 
-    - run: "echo $RELEASE_TAG"
-    - run: echo ${{ env.RELEASE_TAG }}
+    - run: |
+        echo "RELEASE_TAG=$(echo $GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED | sed -r 's/Release /v/')" >> $GITHUB_ENV
 
     - name: Create release
       uses: actions/create-release@v1
