@@ -77,6 +77,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        with:
+          create_tag: false
 
       - name: GPM publish
         if: success()
@@ -99,8 +101,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Release
+    - name: Expose git commit data
+      uses: rlespinasse/git-commit-data-action@v1.x
+
+    - name: Create release
       uses: softprops/action-gh-release@v1
+      with:
+        name: echo "$GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //'"
+        tag_name: echo "$GIT_COMMIT_MESSAGE_SUBJECT | sed -r 's/Release //'"
+        draft: false
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
