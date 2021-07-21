@@ -130,10 +130,10 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_AVATAR: repository
+          SLACK_USERNAME: GitHub Release Notification
+          SLACK_AVATAR: sender
         with:
-          args: 'New version has been released [${{ github.repository }}]'
+          args: '[${{ github.repository }}] Published the release [${{ env.RELEASE_NAME }}]'
 
 
 
