@@ -82,11 +82,11 @@ jobs:
 
     steps:
       - name: Notify the authors
+        uses: Ilshidur/action-slack@2.1.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: GitHub Circuit Actions
           SLACK_AVATAR: repository
-        uses: Ilshidur/action-slack@2.1.0
         with:
           args: 'New version has been published!'
 
