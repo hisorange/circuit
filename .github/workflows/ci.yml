@@ -86,7 +86,8 @@ jobs:
           node-version: 14.x
           registry-url: 'https://npm.pkg.github.com'
           scope: '@hisorange'
-        run: yarn publish --non-interactive
+      - run: yarn publish --non-interactive
+        if: ${{ steps.npm-publish.outputs.changed }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
