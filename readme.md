@@ -92,6 +92,7 @@ node.subscribe<UserCreatedEvent>('user.created', sendWelcomeEmailToUser);
 
 - [GitHub](https://github.com/hisorange/circuit)
 - [NPM](https://www.npmjs.com/package/@hisorange/circuit)
+- [GPM](https://github.com/hisorange/circuit/packages/907960)
 
 ### What's with the weird name?
 
