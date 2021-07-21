@@ -203,7 +203,7 @@ describe('Network', () => {
       await node1.subscribe('srv1', () => {});
       await node2.subscribe('srv2', () => {});
 
-      await new Promise(wait => setTimeout(wait, 200));
+      await new Promise(wait => setTimeout(wait, 800));
 
       expect(node1['network'].find('srv1')).toBe('find1');
       expect(node1['network'].find('srv2')).toBe('find2');
@@ -212,7 +212,7 @@ describe('Network', () => {
       expect(node2['network'].find('srv2')).toBe('find2');
 
       await t.disconnect();
-    }, 800);
+    }, 2000);
   });
 
   test('should retrieve in round robin', async () => {
