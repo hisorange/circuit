@@ -1,12 +1,12 @@
 name: 'CI'
 
-on:
-  push:
-    paths:
-      - '**.(ts|js|json)'
-  pull_request:
-    paths:
-      - '**.(ts|js|json)'
+on: [push, pull_request]
+  # push:
+  #   paths:
+  #     - '**.(ts|js|json)'
+  # pull_request:
+  #   paths:
+  #     - '**.(ts|js|json)'
 
 jobs:
   testing:
