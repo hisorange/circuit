@@ -1,6 +1,6 @@
 {
   "name": "@hisorange/circuit",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "description": "Versatile messaging library with support for multiple transport medium.",
   "keywords": [
     "messaging",
