@@ -56,9 +56,6 @@ jobs:
         env:
           TEST_TRANSPORT: ioredis
 
-      - name: Display Commit Message
-        run: echo "${{ env.GIT_COMMIT_MESSAGE_SUBJECT }} and it's ${{ startsWith(env.GIT_COMMIT_MESSAGE_SUBJECT, 'Release') }}"
-
     outputs:
       commit_message: ${{ env.GIT_COMMIT_MESSAGE_SUBJECT }}
 
@@ -98,7 +95,7 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Publish to GPR
-        if: ${{ steps.npm-publish.outputs.changed == true }}
+        if: ${{ steps.npm-publish.outputs.changed == true || steps.npm-publish.outputs.changed == 'true' }}
         run: |
           yarn config set registry-url https://npm.pkg.github.com
           yarn publish --non-interactive
@@ -106,7 +103,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     outputs:
-      changed: ${{ steps.npm-publish.outputs.changed }}
+      changed: ${{ steps.npm-publish.outputs.changed == true || steps.npm-publish.outputs.changed == 'true' }}
 
   release:
     name: Release GH
