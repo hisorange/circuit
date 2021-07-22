@@ -73,7 +73,10 @@ describe('Router', () => {
     // Handle slow requests
     await c.respond(
       'wait1s',
-      () => new Promise(ok => delayers.push(() => ok(++resolved))),
+      () =>
+        new Promise(ok => {
+          delayers.push(() => ok(++resolved));
+        }),
       {
         concurrency: 5,
       },
@@ -85,11 +88,25 @@ describe('Router', () => {
       requests.push(c.request<number, number>('wait1s', i));
     }
 
-    delayers.forEach(d => d());
+    while (delayers.length < 5) {
+      await new Promise(ok => setTimeout(ok, 10));
+    }
+
+    delayers.splice(0, 5).forEach(d => d());
     expect(resolved).toBe(5);
-    delayers.forEach(d => d());
+
+    while (delayers.length < 5) {
+      await new Promise(ok => setTimeout(ok, 10));
+    }
+
+    delayers.splice(0, 5).forEach(d => d());
     expect(resolved).toBe(10);
-    delayers.forEach(d => d());
+
+    while (delayers.length < 5) {
+      await new Promise(ok => setTimeout(ok, 10));
+    }
+
+    delayers.splice(0, 5).forEach(d => d());
     expect(resolved).toBe(15);
 
     await c.disconnect();
@@ -109,6 +126,7 @@ describe('Router', () => {
 
     expect(req).rejects.toBe(TimeoutException);
 
+    await t.disconnect();
     await c.disconnect();
   }, 1000);
 });
