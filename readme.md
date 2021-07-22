@@ -52,6 +52,18 @@ await node1.respond<SumAction>('sum' (msg) => msg.content.a + msg.content.b);
 assert(await node2.request<SumAction>('sum', { a: 2, b: 2}) === 4);
 ```
 
+**Request options**
+
+| Key     | Default | Description                                     |
+| ------- | ------- | ----------------------------------------------- |
+| **ttl** | 60000   | Maximum wait time before the message is ignored |
+
+**Response options**
+
+| Key             | Default  | Description                  |
+| --------------- | -------- | ---------------------------- |
+| **concurrency** | Infinity | Maximum concurrent execution |
+
 ### Example: Publish / Subscribe
 
 ---

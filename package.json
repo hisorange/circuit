@@ -1,6 +1,6 @@
 {
   "name": "@hisorange/circuit",
-  "version": "0.2.22",
+  "version": "0.3.0",
   "description": "Versatile messaging library with support for multiple transport medium.",
   "keywords": [
     "messaging",
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/ioredis": "~4.26.6",
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^27.0.0",
     "@types/node": "^15.0.2",
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
@@ -55,6 +55,7 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
+    "@hisorange/resistor": "^1.1.6",
     "ts-deepmerge": "^1.0.8",
     "tslib": "^2.3.0",
     "uuid": "^8.3.2"

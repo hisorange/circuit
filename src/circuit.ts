@@ -1,5 +1,7 @@
 import {
   IRequestHandler,
+  IRequestOptions,
+  IRespondOptions,
   ISubscribeHandler,
   ISubscription,
   ITransport,
@@ -51,11 +53,14 @@ export class Circuit {
   }
 
   /**
-   * @description Request the execution of a registered action.
+   * @description Request the execution of a remote action.
    */
   async request<I = unknown, O = unknown>(
     channel: string,
     content: I,
+    options: Partial<IRequestOptions> = {
+      ttl: 60_000,
+    },
   ): Promise<O> {
     const request = new Message<I>();
     request.sender = this.id;
@@ -63,12 +68,19 @@ export class Circuit {
     request.recipient = this.network.find(channel);
     request.content = content;
 
-    return (await this.router.doRequest<I, O>(request)).content;
+    return (await this.router.createRequestHandler<I, O>(request, options.ttl))
+      .content;
   }
 
+  /**
+   * @description Answer a remotely started action and send back the results.
+   */
   async respond<I = unknown, O = unknown>(
     channel: string,
     handler: IRequestHandler<I, O>,
+    options: Partial<IRespondOptions> = {
+      concurrency: Infinity,
+    },
   ): Promise<ISubscription> {
     // Register the action "sum" to this circuit.
     await this.network.register(channel);
@@ -76,7 +88,10 @@ export class Circuit {
     // A single channel associated to this node's execution for this job.
     const directChannel = this.id + '.' + channel;
 
-    return await this.subscribe(directChannel, this.router.doRespond(handler));
+    return await this.subscribe(
+      directChannel,
+      this.router.createResponder(handler, options),
+    );
   }
 
   /**

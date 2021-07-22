@@ -1,4 +1,4 @@
-import { TimeoutException } from '../src';
+import { Circuit, TimeoutException } from '../src';
 import { Message } from '../src/messaging/message';
 import { Subscription } from '../src/messaging/subscription';
 import { Router } from '../src/router';
@@ -46,7 +46,7 @@ describe('Router', () => {
     req.recipient = 'r2';
     req.channel = 'sum';
 
-    const m = r.doRequest(req, 50);
+    const m = r.createRequestHandler(req, 50);
     expect(m).rejects.toThrow(TimeoutException);
 
     expect(t.publish).toHaveBeenCalledWith('r2.sum', req);
@@ -60,4 +60,55 @@ describe('Router', () => {
     r.disconnect();
     await t.disconnect();
   }, 2000);
+
+  test('should handle concurrency', async () => {
+    const t = createTransport();
+    await t.connect();
+    const c = new Circuit(undefined, t);
+    await c.connect();
+
+    let resolved = 0;
+    const delayers = [];
+
+    // Handle slow requests
+    await c.respond(
+      'wait1s',
+      () => new Promise(ok => delayers.push(() => ok(++resolved))),
+      {
+        concurrency: 5,
+      },
+    );
+
+    const requests: Promise<number>[] = [];
+
+    for (let i = 0; i < 15; i++) {
+      requests.push(c.request<number, number>('wait1s', i));
+    }
+
+    delayers.forEach(d => d());
+    expect(resolved).toBe(5);
+    delayers.forEach(d => d());
+    expect(resolved).toBe(10);
+    delayers.forEach(d => d());
+    expect(resolved).toBe(15);
+
+    await c.disconnect();
+  }, 1000);
+
+  test('should apply the TTL to the request', async () => {
+    const t = createTransport();
+    await t.connect();
+    const c = new Circuit(undefined, t);
+    await c.connect();
+
+    await c.respond('never', () => new Promise(() => {}));
+
+    const req = c.request<number, number>('never', 1, {
+      ttl: 15,
+    });
+
+    expect(req).rejects.toBe(TimeoutException);
+
+    await c.disconnect();
+  }, 1000);
 });

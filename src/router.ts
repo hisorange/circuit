@@ -1,5 +1,11 @@
+import { Resistor } from '@hisorange/resistor';
 import { TimeoutException } from './exceptions';
-import { IRequestHandler, ISubscription, ITransport } from './interfaces';
+import {
+  IRequestHandler,
+  IRespondOptions,
+  ISubscription,
+  ITransport,
+} from './interfaces';
 import { Message } from './messaging/message';
 import { Subscription } from './messaging/subscription';
 
@@ -57,7 +63,10 @@ export class Router {
     }
   }
 
-  doRequest<I, O>(request: Message<I>, ttl = 60_000): Promise<Message<O>> {
+  createRequestHandler<I, O>(
+    request: Message<I>,
+    ttl = 60_000,
+  ): Promise<Message<O>> {
     // Change or assign the reply channel to the router.
     request.replyTo = this.replyTo;
     request.timeToLive = ttl;
@@ -105,8 +114,11 @@ export class Router {
   /**
    * @description Wrap a request handler into a request execution and response handler logic.
    */
-  doRespond<I, O>(handler: IRequestHandler<I, O>): IRequestHandler<I, void> {
-    return async request => {
+  createResponder<I, O>(
+    handler: IRequestHandler<I, O>,
+    options: Partial<IRespondOptions> = {},
+  ): IRequestHandler<I, void> {
+    const messageProcessor = async (request: Message<I>) => {
       const response = new Message();
       response.sender = this.circuitId;
       response.channel = request.replyTo;
@@ -116,5 +128,27 @@ export class Router {
 
       this.transport.publish(request.replyTo, response);
     };
+
+    // Limit the handler's concurrency with the resistor package.
+    if (
+      options.concurrency &&
+      options.concurrency > 0 &&
+      options.concurrency !== Infinity
+    ) {
+      const resistor = new Resistor(
+        (messages: Message<I>[]) => messageProcessor(messages[0]),
+        {
+          threads: options.concurrency,
+          buffer: {
+            size: 1,
+          },
+          autoFlush: false,
+        },
+      );
+
+      return async (request: Message<I>) => resistor.push(request);
+    }
+
+    return messageProcessor;
   }
 }

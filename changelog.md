@@ -2,6 +2,11 @@
 
 ---
 
+##### 0.3.0
+
+- Responders can adjust their concurrency <3
+- Request TTL option
+
 ##### 0.2.x
 
 - Experimenting with GitHub actions and DevOps
