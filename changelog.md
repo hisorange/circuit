@@ -2,10 +2,11 @@
 
 ---
 
-##### 0.3.0
+##### 0.3.x
 
 - Responders can adjust their concurrency <3
 - Request TTL option
+- Export interfaces for TS safe implementations
 
 ##### 0.2.x
 
