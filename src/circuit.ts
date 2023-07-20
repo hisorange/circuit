@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { Logger, pino } from 'pino';
 import {
   IRequestHandler,
   IRequestOptions,
@@ -20,9 +21,19 @@ export class Circuit {
   protected router: Router;
   protected subscriptions = new Map<string, ISubscription[]>();
 
-  constructor(readonly id?: string, protected transport?: ITransport) {
+  constructor(
+    readonly id?: string,
+    protected transport?: ITransport,
+    readonly logger?: Logger,
+  ) {
     if (!this.id) {
       this.id = randomUUID();
+    }
+
+    if (!this.logger) {
+      this.logger = pino({
+        name: `circuit.${this.id}`,
+      });
     }
 
     if (!this.transport) {
@@ -33,6 +44,8 @@ export class Circuit {
   async connect(): Promise<void> {
     if (!this.transport.isConnected()) {
       await this.transport.connect();
+
+      this.logger.debug('Connected');
     }
 
     this.network = new Network();
@@ -50,6 +63,8 @@ export class Circuit {
 
       await this.transport.disconnect();
     }
+
+    this.logger.debug('Disconnected');
   }
 
   /**
@@ -62,13 +77,22 @@ export class Circuit {
       ttl: 60_000,
     },
   ): Promise<O> {
-    const request = new Message<I>();
-    request.sender = this.id;
-    request.channel = channel;
-    request.recipient = this.network.find(channel);
-    request.content = content;
+    const message = new Message<I>();
+    message.sender = this.id;
+    message.channel = channel;
+    message.recipient = this.network.find(channel);
+    message.content = content;
 
-    return (await this.router.createRequestHandler<I, O>(request, options.ttl))
+    this.logger.debug(
+      {
+        channel,
+        recipient: message.recipient,
+        messageId: message.id,
+      },
+      'Request',
+    );
+
+    return (await this.router.createRequestHandler<I, O>(message, options.ttl))
       .content;
   }
 
@@ -101,19 +125,27 @@ export class Circuit {
     channel: string,
     content: MessageContent | Message,
   ): Promise<void> {
-    let msg: Message;
+    let message: Message;
 
     if (content instanceof Message) {
-      msg = content;
+      message = content;
     } else {
-      msg = new Message();
-      msg.content = content;
+      message = new Message();
+      message.content = content;
     }
 
-    msg.channel = channel;
-    msg.sender = this.id;
+    message.channel = channel;
+    message.sender = this.id;
 
-    return this.transport.publish(channel, msg);
+    this.logger.debug(
+      {
+        channel,
+        messageId: message.id,
+      },
+      'Publish',
+    );
+
+    return this.transport.publish(channel, message);
   }
 
   /**

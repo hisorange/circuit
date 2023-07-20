@@ -46,7 +46,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@hisorange/resistor": "^2.1.0"
+    "@hisorange/resistor": "^2.1.0",
+    "pino": "^8.14.1"
   },
   "optionalDependencies": {
     "ioredis": "~4.27.6"
