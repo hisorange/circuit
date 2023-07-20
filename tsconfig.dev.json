@@ -9,7 +9,7 @@
     "outDir": "./build",
     "rootDir": "./src",
     "removeComments": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "lib": ["ES2020"],
 
     "strict": true,

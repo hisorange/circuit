@@ -1,10 +1,10 @@
-import UUID = require('uuid');
+import { randomUUID } from 'crypto';
 
 export class Message<P = string | number | unknown | boolean> {
   /**
    * @description Unique message ID will be used for reply tracking.
    */
-  readonly id: string = UUID.v4();
+  readonly id: string = randomUUID();
 
   /**
    * @description Sender node, always set.

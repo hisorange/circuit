@@ -13,7 +13,7 @@ const jestConfig = {
   // Typescript compiler configuration.
   globals: {
     'ts-jest': {
-      tsConfig: 'tsconfig.test.json',
+      tsConfig: 'tsconfig.dev.json',
     },
   },
 

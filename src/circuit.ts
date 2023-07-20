@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import {
   IRequestHandler,
   IRequestOptions,
@@ -11,7 +12,6 @@ import { Subscription } from './messaging/subscription';
 import { Network } from './network';
 import { Router } from './router';
 import { InMemoryTransport } from './transports';
-import UUID = require('uuid');
 
 type MessageContent = string | number | unknown | boolean;
 
@@ -22,7 +22,7 @@ export class Circuit {
 
   constructor(readonly id?: string, protected transport?: ITransport) {
     if (!this.id) {
-      this.id = UUID.v4();
+      this.id = randomUUID();
     }
 
     if (!this.transport) {

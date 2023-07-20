@@ -136,7 +136,7 @@ export class Router {
       options.concurrency !== Infinity
     ) {
       const resistor = new Resistor(
-        (messages: Message<I>[]) => messageProcessor(messages[0]),
+        (message: Message<I>) => messageProcessor(message),
         {
           threads: options.concurrency,
           buffer: {
