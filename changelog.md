@@ -2,6 +2,12 @@
 
 ---
 
+##### 0.4.0
+
+- Upgrade to modern dependencies
+- Remove unused code and deps
+- Add pino logger into circuit
+
 ##### 0.3.x
 
 - Responders can adjust their concurrency <3
